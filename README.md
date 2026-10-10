@@ -2,13 +2,15 @@
 
 A PDF-to-text converter I wrote in 1998 for a search engine called Alkaline. I needed to extract text for indexing without requiring separately installed libraries.
 
+![PDF reader converting a sample document to text](images/pdfreader.gif)
+
 ## The 1998 Original
 
 The source was recovered from a backup, with a verified date of **December 26, 1998**. It is preserved unchanged in [`original/`](original/), including the Visual C++ 6 project files, support libraries, and bundled zlib source.
 
 The goal was to read PDF files and convert them to text on the console. Give it a PDF filename, and it attempted to print document metadata, page text, and bookmark titles.
 
-I was learning the PDF format by implementing a parser from Adobe's published PDF Reference. The source even cites a page number for stream filters.
+I was learning the PDF format by implementing a parser from Adobe's published PDF Reference. The source even cites a page number for stream filters. [Adobe's PDF history](https://www.adobe.com/accessibility/pdf.html) dates the public specification to 1993. This converter predates tagged PDF, introduced in 2001: it extracts text from page drawing commands rather than a tagged reading order. PDF became an ISO standard in 2008.
 
 ### What It Implemented
 
