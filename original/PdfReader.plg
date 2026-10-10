@@ -1,0 +1,58 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: PdfReader - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "N:\TEMP\RSP6E6.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /I "./" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "_AFXDLL" /Fp"Debug/PdfReader.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"Z:\PdfReader\PDFObjects.cpp"
+]
+Creating command line "cl.exe @N:\TEMP\RSP6E6.tmp" 
+Creating temporary file "N:\TEMP\RSP6E7.tmp" with contents
+[
+/nologo /subsystem:console /incremental:yes /pdb:"Debug/PdfReader.pdb" /debug /machine:I386 /out:"Debug/PdfReader.exe" /pdbtype:sept 
+.\Debug\Adler32.obj
+.\Debug\cdate.obj
+.\Debug\chashtable.obj
+.\Debug\cmd5.obj
+.\Debug\cstring.obj
+.\Debug\cvector.obj
+.\Debug\DEFLATE.OBJ
+.\Debug\INFBLOCK.OBJ
+.\Debug\INFCODES.OBJ
+.\Debug\INFFAST.OBJ
+.\Debug\INFLATE.OBJ
+.\Debug\INFTREES.OBJ
+.\Debug\INFUTIL.OBJ
+.\Debug\main.obj
+.\Debug\PDFCoordinate.obj
+.\Debug\PDFDocumentStructure.obj
+.\Debug\PDFFile.obj
+.\Debug\PDFFileStructure.obj
+.\Debug\PDFObjectRef.obj
+.\Debug\PDFObjects.obj
+.\Debug\PDFPageDescription.obj
+.\Debug\TREES.OBJ
+.\Debug\zlibengn.obj
+.\Debug\ZUTIL.OBJ
+]
+Creating command line "link.exe @N:\TEMP\RSP6E7.tmp"
+<h3>Output Window</h3>
+Compiling...
+PDFObjects.cpp
+Z:\PdfReader\PDFObjects.cpp(89) : warning C4390: ';' : empty controlled statement found; is this the intent?
+Z:\PdfReader\PDFObjects.cpp(956) : warning C4660: template-class specialization 'CHashTable<class PDFObjects>' is already instantiated
+Z:\PdfReader\PDFObjects.cpp(958) : warning C4660: template-class specialization 'CVector<class PDFObjects>' is already instantiated
+Linking...
+
+
+
+<h3>Results</h3>
+PdfReader.exe - 0 error(s), 3 warning(s)
+</pre>
+</body>
+</html>

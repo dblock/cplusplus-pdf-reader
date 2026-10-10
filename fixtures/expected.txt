@@ -1,0 +1,21 @@
+Author: Daniel (test)
+Creation Date: D:19981226120000Z
+Modification Date: 
+Creator: Synthetic fixture generator
+Producer: 
+Title: Legacy PDF
+Subject: 
+Keywords: 
+
+Page 1:
+Hello, world!
+Second
+Third
+Fourth
+Fifth
+Hex
+
+Outlines:
+Chapter One
+  Child
+Chapter Two
