@@ -1,14 +1,14 @@
 # C++ PDF Reader
 
-A PDF-to-text converter I wrote in 1998 for a search engine called Alkaline. I needed self-contained PDF-to-text conversion for indexing, with no external runtime dependencies beyond the platform runtime.
+A PDF-to-text converter I wrote in 1998 for a search engine called Alkaline. I needed to extract text for indexing without requiring separately installed libraries.
 
 ## The 1998 Original
 
-The source was recovered from a backup, with a verified date of **December 26, 1998**. Its headers say `PDF Support (c) Daniel Doubrovkine - 1998/99 All Rights Reserved`. It is preserved in [`original/`](original/) without changes to its contents, including the Visual C++ 6 project files, support libraries, and bundled zlib source. The former `PdfReader` subdirectory has been flattened into `original/`.
+The source was recovered from a backup, with a verified date of **December 26, 1998**. It is preserved unchanged in [`original/`](original/), including the Visual C++ 6 project files, support libraries, and bundled zlib source.
 
 The goal was to read PDF files and convert them to text on the console. Give it a PDF filename, and it attempted to print document metadata, page text, and bookmark titles.
 
-I was learning the PDF format by implementing a parser. Adobe had already published the format; the source refers explicitly to the PDF Reference, including a page number for stream filters. This was not an implementation of an undocumented file format.
+I was learning the PDF format by implementing a parser from Adobe's published PDF Reference. The source even cites a page number for stream filters.
 
 ### What It Implemented
 
@@ -20,7 +20,7 @@ I was learning the PDF format by implementing a parser. Adobe had already publis
 - Flate-compressed content streams using the bundled zlib implementation.
 - Outline traversal, printing nested bookmark titles.
 
-The program bundled my string, vector, hash-table, date, and MD5 helpers, together with zlib, to keep the converter self-contained for Alkaline. The encryption code was a stub; including an MD5 implementation did not make encrypted PDFs readable.
+The program bundled my string, vector, hash-table, date, and MD5 helpers, together with zlib. Encryption was a stub.
 
 ### What It Did Not Do
 
@@ -32,13 +32,13 @@ The files `original/pdf.tmp` and `original/pdf.new` appear to be compressed and 
 
 ## Modern Port
 
-A working C++17 port lives in `src/`, completely separate from `original/`. It preserves the converter's purpose and recognizable architecture, replacing obsolete compiler interfaces and unsafe storage with standard-library types. It is not a wrapper around an external PDF library, a graphical renderer, or a full production PDF framework.
+A C++17 port lives in `src/`. It keeps the original parsing approach, replacing obsolete compiler interfaces and storage with standard-library types.
 
-The port uses system zlib rather than building the bundled 1990s copy. This is a deliberate modern dependency, not a claim that the original required a separate zlib installation.
+The port uses system zlib instead of the bundled 1990s copy.
 
 ### Build and Run
 
-Requirements: a C++17 compiler, `make`, and system zlib headers/library. On macOS, the compiler and zlib are available with the Command Line Tools. No CMake is needed.
+Requirements: a C++17 compiler, `make`, and zlib headers/library. On macOS, these are available with the Command Line Tools.
 
 ```sh
 make
@@ -47,15 +47,13 @@ make
 ./pdf-reader --help
 ```
 
-The Makefile defaults to `clang++`; use `make CXX=g++` for another compiler. It compiles with `-std=c++17` and links `-lz`.
+The Makefile defaults to `clang++`; use `make CXX=g++` for GCC.
 
-Output retains the original eight information labels, then adds explicit `Page N:` and `Outlines:` headings. Missing metadata is empty. Dates are printed as stored PDF date strings: the historical code reformatted them and substituted the current time for missing dates, making results nondeterministic. The port does not convert timezones.
+Output contains document metadata, `Page N:` text, and `Outlines:` titles. Missing metadata is empty; dates are printed as stored.
 
-Exit status is `0` on success, `1` for I/O, invalid data, resource limits, or unsupported features, and `2` for incorrect arguments. Diagnostics go to stderr. The complete report is validated before stdout is written, so parsing failures do not leave misleading partial output.
+Exit status is `0` on success, `1` for file or parsing errors, and `2` for incorrect arguments. Errors go to stderr; failed conversions produce no partial report.
 
 ### Architecture
-
-This is a clean modernization of the original parser, not a verbatim rebuild of the historical source:
 
 | Historical responsibility | Modern implementation |
 | --- | --- |
@@ -66,9 +64,7 @@ This is a clean modernization of the original parser, not a verbatim rebuild of 
 | Bundled zlib / `ZlibEngine` | Bounded, checked system-zlib `inflate`, with RAII cleanup |
 | Constructor-based CLI | Standard `int main`, explicit diagnostics and return codes |
 
-There is no dependency on the historical containers, MD5/RC4, Win32, or bundled zlib. In-memory binary file storage and stream views replace line-oriented scans and searches for `endobj` inside binary data. The old bundle's `original/zlib/README.TXT` identifies it as mostly zlib 1.0; the wrapper credits Mark Nelson / Tiny Software.
-
-### Supported Legacy Features and Fixes
+### Supported Features
 
 - PDF headers 1.0, 1.1, and 1.2; classic xref tables with multiple subsections and incremental `/Prev` chains. New entries, including free entries, mask older entries; generation numbers and object offsets are checked.
 - Dictionaries, mixed arrays, booleans, null, signed integer/decimal numbers, names (including `#xx` escapes), and indirect references.
@@ -80,7 +76,7 @@ There is no dependency on the historical containers, MD5/RC4, Win32, or bundled 
 - `BT`, `ET`, `Td`, `TD`, `Tm`, `Tj`, `TJ`, `T*`, `'`, and `"` text operators. Quotes move to the next line **before** showing text. `TJ` shows every string in order and ignores numeric kerning adjustments; it does not insert arbitrary spaces between fragments. `Td`/`TD` insert newlines, as in the original; `Tm` does not attempt geometric layout.
 - The original `/Info` fields and recursively indented outline titles; UTF-16BE/LE metadata and outline strings with a BOM are converted to UTF-8.
 
-### Deliberate Limitations and Strict Rejection
+### Limitations
 
 - Encryption, xref streams, object streams, hybrid `/XRefStm` tables, catalog version overrides, and versions newer than PDF 1.2 are rejected.
 - Only `FlateDecode` is supported. ASCIIHex/ASCII85, LZW, image filters such as DCT/JPEG, filter abbreviations, predictors other than 1, other decode parameters, and external-file streams are rejected.
@@ -91,22 +87,12 @@ There is no dependency on the historical containers, MD5/RC4, Win32, or bundled 
 
 ### Resource Limits
 
-Limits are explicit constants in `src/PDFObjects.h`:
-
-- 64 MiB input file, 32 MiB raw or decoded stream, 32 MiB combined page content;
-- 64 MiB cumulative decoded stream data (including intermediate filter outputs) and 64 MiB report output;
-- one million parsing-budget units; objects/xref entries cost one unit and parsed string/name payload costs an additional unit per 32 bytes;
-- object numbers below 100,000, 100,000 document-tree visits, 128 xref revisions;
-- 64 levels for object/string nesting, reference loading/resolution, pages, and outlines; eight filters per stream and 1,024 pending content operands.
-
-Cyclic/repeated page or outline nodes, cyclic reference resolution, invalid stream lengths, impossible offsets, and non-progressing decompression fail with an explicit diagnostic. These conservative limits bound this small reader's work; they do not make it a comprehensive validator for every PDF specification rule.
+Input files are limited to 64 MiB, individual streams and combined page content to 32 MiB, and cumulative decoded data and output to 64 MiB each. Parsing, nesting, and traversal limits are defined in `src/PDFObjects.h`. Invalid lengths, offsets, and reference cycles produce errors.
 
 ### Sample Documents
 
-`fixtures/legacy-uncompressed.pdf` and `fixtures/legacy-flate-crlf.pdf` are synthetic sample documents; they contain no third-party document content. Both produce `fixtures/expected.txt`. The second uses CRLF, Flate, and an indirect stream length.
-
-`make clean` removes the executable, never `original/` or the sample documents.
+The two PDFs in `fixtures/` demonstrate uncompressed and Flate-compressed content. Both produce `fixtures/expected.txt`.
 
 ## License
 
-My code is released under the [MIT License](LICENSE). Bundled third-party code, including the historical zlib source in `original/zlib/`, retains its own license notices.
+[MIT License](LICENSE). Bundled third-party code, including the historical zlib source in `original/zlib/`, retains its own license notices.
